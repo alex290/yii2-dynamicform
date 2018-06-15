@@ -2,8 +2,7 @@ yii2-dynamicform
 ===================
 
 
-**IMPORTANT** broobe do not want to take credit for this library. It is a cloned copy from wbranganca and kept on 
-our organization for the maintenance of some of our projects that do use this extension. 
+Это исправленная и дополненная копия из wbranganca и для поддержки некоторых наших проектов, которые используют это расширение 
 
 
 Installation
