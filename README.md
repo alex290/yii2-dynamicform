@@ -181,7 +181,7 @@ use app\models\Address;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use app\base\Model;
+use alex290\dynamicform\models\DynamicModel;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
@@ -204,8 +204,8 @@ class CustomerController extends Controller
         $modelsAddress = [new Address];
         if ($modelCustomer->load(Yii::$app->request->post())) {
 
-            $modelsAddress = Model::createMultiple(Address::classname());
-            Model::loadMultiple($modelsAddress, Yii::$app->request->post());
+            $modelsAddress = DynamicModel::createMultiple(Address::classname());
+            DynamicModel::loadMultiple($modelsAddress, Yii::$app->request->post());
 
             // ajax validation
             if (Yii::$app->request->isAjax) {
@@ -218,7 +218,7 @@ class CustomerController extends Controller
 
             // validate all models
             $valid = $modelCustomer->validate();
-            $valid = Model::validateMultiple($modelsAddress) && $valid;
+            $valid = DynamicModel::validateMultiple($modelsAddress) && $valid;
             
             if ($valid) {
                 $transaction = \Yii::$app->db->beginTransaction();
@@ -262,8 +262,8 @@ class CustomerController extends Controller
         if ($modelCustomer->load(Yii::$app->request->post())) {
 
             $oldIDs = ArrayHelper::map($modelsAddress, 'id', 'id');
-            $modelsAddress = Model::createMultiple(Address::classname(), $modelsAddress);
-            Model::loadMultiple($modelsAddress, Yii::$app->request->post());
+            $modelsAddress = DynamicModel::createMultiple(Address::classname(), $modelsAddress);
+            DynamicModel::loadMultiple($modelsAddress, Yii::$app->request->post());
             $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($modelsAddress, 'id', 'id')));
 
             // ajax validation
@@ -277,7 +277,7 @@ class CustomerController extends Controller
 
             // validate all models
             $valid = $modelCustomer->validate();
-            $valid = Model::validateMultiple($modelsAddress) && $valid;
+            $valid = DynamicModel::validateMultiple($modelsAddress) && $valid;
 
             if ($valid) {
                 $transaction = \Yii::$app->db->beginTransaction();
@@ -314,55 +314,7 @@ class CustomerController extends Controller
 }
 ```
 
-###Model Class
 
-```php
-<?php
-
-namespace app\base;
-
-use Yii;
-use yii\helpers\ArrayHelper;
-
-class Model extends \yii\base\Model
-{
-    /**
-     * Creates and populates a set of models.
-     *
-     * @param string $modelClass
-     * @param array $multipleModels
-     * @return array
-     */
-    public static function createMultiple($modelClass, $multipleModels = [])
-    {
-        $model    = new $modelClass;
-        $formName = $model->formName();
-        $post     = Yii::$app->request->post($formName);
-        $models   = [];
-
-        if (! empty($multipleModels)) {
-            $keys = array_keys(ArrayHelper::map($multipleModels, 'id', 'id'));
-            $multipleModels = array_combine($keys, $multipleModels);
-        }
-
-        if ($post && is_array($post)) {
-            foreach ($post as $i => $item) {
-                if (isset($item['id']) && !empty($item['id']) && isset($multipleModels[$item['id']])) {
-                    $models[] = $multipleModels[$item['id']];
-                } else {
-                    $models[] = new $modelClass;
-                }
-            }
-        }
-
-        unset($model, $formName, $post);
-
-        return $models;
-    }
-}
-
-
-```
 
 
 ###To zero or more elements (use the following code in your view file)
@@ -373,7 +325,7 @@ class Model extends \yii\base\Model
 <?php
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use wbraganca\dynamicform\DynamicFormWidget;
+use alex290\dynamicform\DynamicFormWidget;
 ?>
 
 <div class="customer-form">
